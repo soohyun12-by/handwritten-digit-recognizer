@@ -1,0 +1,198 @@
+/* 색상 변수 (라이트 모드 기본값) */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1d1f24;
+  --text-muted: #5f6672;
+  --border: #dde1e7;
+  --accent: #3b6fe0;
+  --bar-bg: #e8ebf0;
+  --bar: #9aa8c2;
+  --canvas-border: #2a2d33;
+}
+
+/* 다크 모드 색상 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171b;
+    --surface: #1f2228;
+    --text: #e8eaee;
+    --text-muted: #9aa1ad;
+    --border: #2f343c;
+    --accent: #6d97f2;
+    --bar-bg: #2a2e36;
+    --bar: #5a6478;
+    --canvas-border: #4a505a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+header h1 {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+}
+
+.subtitle {
+  margin: 0 0 24px;
+  color: var(--text-muted);
+}
+
+/* 넓은 화면: 좌우 배치 / 좁은 화면: 위아래 배치 */
+.layout {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.draw-panel,
+.result-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.draw-panel {
+  flex: 0 1 314px;
+}
+
+.result-panel {
+  flex: 1 1 240px;
+}
+
+/* 좁은 화면(휴대폰)에서는 두 영역 모두 전체 너비 사용 */
+@media (max-width: 600px) {
+  .draw-panel,
+  .result-panel {
+    flex: 1 1 100%;
+  }
+}
+
+/* 캔버스: 내부 해상도는 280x280 고정, 화면 크기는 반응형 */
+#draw-canvas {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background: #000;
+  border: 2px solid var(--canvas-border);
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none; /* 터치로 그릴 때 화면 스크롤 방지 */
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+button {
+  padding: 8px 24px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+.prediction {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.prediction-label {
+  color: var(--text-muted);
+}
+
+.prediction-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  margin: 0 0 12px;
+  min-height: 1.5em;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* 확률 막대그래프 */
+.prob-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.prob-item {
+  display: grid;
+  grid-template-columns: 1.2em 1fr 3.8em;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.prob-bar {
+  height: 12px;
+  background: var(--bar-bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.prob-fill {
+  height: 100%;
+  width: 0;
+  background: var(--bar);
+  transition: width 0.2s ease;
+}
+
+.prob-value {
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* 가장 높은 확률의 숫자 강조 */
+.prob-item.best .prob-fill {
+  background: var(--accent);
+}
+
+.prob-item.best .prob-digit,
+.prob-item.best .prob-value {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+footer {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}

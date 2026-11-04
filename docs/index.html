@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handwritten Digit Recognizer</title>
+  <meta name="description" content="Draw a digit (0-9) and a neural network trained on MNIST recognizes it in your browser.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Handwritten Digit Recognizer</h1>
+      <p class="subtitle">Draw a digit from 0 to 9. Recognition runs entirely in your browser.</p>
+    </header>
+
+    <div class="layout">
+      <!-- 그리기 영역 -->
+      <section class="draw-panel">
+        <canvas id="draw-canvas" width="280" height="280" aria-label="Drawing canvas"></canvas>
+        <div class="buttons">
+          <button id="clear-button" type="button">Clear</button>
+        </div>
+      </section>
+
+      <!-- 결과 영역: 예측 숫자 + 0~9 확률 막대 -->
+      <section class="result-panel" aria-live="polite">
+        <div class="prediction">
+          <span class="prediction-label">Prediction</span>
+          <span id="prediction-value" class="prediction-value">?</span>
+        </div>
+        <!-- JS가 실행되면 이 문구가 바뀜. 그대로 남아 있으면 스크립트가 로드되지 않은 것 -->
+        <p id="status-text" class="status">Script not loaded. Open this page via http://localhost:8000 (not by double-clicking the file).</p>
+        <ul id="prob-list" class="prob-list"></ul>
+      </section>
+    </div>
+
+    <footer>
+      <p>MLP (784 → 256 → 128 → 10) trained on MNIST with scikit-learn.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

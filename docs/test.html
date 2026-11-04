@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Self Test</title>
+  <style>
+    body { font-family: Consolas, monospace; padding: 16px; background: #fff; color: #111; }
+    @media (prefers-color-scheme: dark) { body { background: #15171b; color: #e8eaee; } }
+  </style>
+</head>
+<body>
+  <h1>Model Self Test</h1>
+  <pre id="output">Running...</pre>
+  <script type="module">
+    // JS 구현이 Python 결과와 같은지 검증하는 페이지
+    import { loadModel, predict } from "./model.js";
+    import { preprocessGray } from "./preprocess.js";
+
+    const output = document.getElementById("output");
+    const lines = [];
+
+    try {
+      const model = await loadModel();
+      const samples = await (await fetch("test_samples.json")).json();
+
+      // 테스트 1: 28x28 원본 입력 → JS 확률이 Python 확률과 같은지 비교
+      let maxDiff = 0;
+      let sameLabel = 0;
+      for (const sample of samples) {
+        const input = Float32Array.from(sample.pixels, (v) => v / 255);
+        const probs = predict(model, input);
+        probs.forEach((p, i) => { maxDiff = Math.max(maxDiff, Math.abs(p - sample.expectedProbs[i])); });
+        const jsBest = probs.indexOf(Math.max(...probs));
+        const pyBest = sample.expectedProbs.indexOf(Math.max(...sample.expectedProbs));
+        if (jsBest === pyBest) sameLabel++;
+      }
+      const test1 = maxDiff < 1e-4 && sameLabel === samples.length;
+      lines.push(`[${test1 ? "PASS" : "FAIL"}] Model math: same prediction ${sameLabel}/${samples.length}, max prob diff ${maxDiff.toExponential(2)}`);
+
+      // 테스트 2: 280x280으로 확대한 이미지 → 전처리 → 정답과 일치하는지 (캔버스 입력 흉내)
+      let correct = 0;
+      for (const sample of samples) {
+        const big = new Float32Array(280 * 280);
+        for (let y = 0; y < 280; y++) {
+          for (let x = 0; x < 280; x++) {
+            big[y * 280 + x] = sample.pixels[Math.floor(y / 10) * 28 + Math.floor(x / 10)];
+          }
+        }
+        const probs = predict(model, preprocessGray(big, 280, 280));
+        if (probs.indexOf(Math.max(...probs)) === sample.label) correct++;
+      }
+      const test2 = correct >= samples.length - 1;
+      lines.push(`[${test2 ? "PASS" : "FAIL"}] Preprocess pipeline: correct ${correct}/${samples.length}`);
+
+      // 테스트 3: 빈 이미지는 null을 반환해야 함
+      const test3 = preprocessGray(new Float32Array(280 * 280), 280, 280) === null;
+      lines.push(`[${test3 ? "PASS" : "FAIL"}] Empty canvas returns null`);
+
+      lines.push(test1 && test2 && test3 ? "ALL TESTS PASSED" : "SOME TESTS FAILED");
+    } catch (error) {
+      lines.push(`ERROR: ${error.message}`);
+    }
+    output.textContent = lines.join("\n");
+  </script>
+</body>
+</html>
